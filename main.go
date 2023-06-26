@@ -17,9 +17,11 @@ func main() {
 	router := gin.Default()
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
 
-	router.StaticFile("index.html", "./static/index.html")
-	router.StaticFile("main.js", "./static/main.js")
-	router.Static("css", "./static/css")
+	basePath := os.Getenv("STATIC_DIRECTORY")
+
+	router.StaticFile("", basePath+"/static/index.html")
+	router.StaticFile("main.js", basePath+"/static/main.js")
+	router.Static("css", basePath+"/static/css")
 
 	public := router.Group("/api")
 	public.POST("/login", controllers.Login)
