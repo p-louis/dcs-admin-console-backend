@@ -31,6 +31,7 @@ func main() {
 	protected.GET("/tacview", controllers.TacViews)
 	protected.POST("/upload", controllers.Upload)
 	protected.GET("/mission", controllers.Missions)
+	protected.POST("/chat", controllers.SendChatMessage)
 
 	router.Run("localhost:8080")
 }
