@@ -9,7 +9,6 @@ import (
 
 	// "github.com/p-louis/dcs-admin/utils/token"
 	"bufio"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -73,16 +72,9 @@ func CurrentMission(c *gin.Context) {
 		return
 	}
 
-	bw := bufio.NewWriter(conn)
-	_, err = fmt.Fprintf(bw, "{\"command\":\"get_mission\"}")
+	_, err = conn.Write([]byte("{\"command\":\"get_mission\"}"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
-		conn.Close()
-		return
-	}
-	err = bw.Flush()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error flushing"})
 		conn.Close()
 		return
 	}
