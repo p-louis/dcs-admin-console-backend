@@ -83,7 +83,7 @@ func CurrentMission(c *gin.Context) {
 	}
 
 	reader := bufio.NewReader(conn)
-	reply, err := reader.ReadString('}')
+	reply, err := reader.ReadString('\n')
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
 		conn.Close()
