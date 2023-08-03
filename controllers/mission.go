@@ -70,8 +70,9 @@ func CurrentMission(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
 		return
 	}
+	command := "{\"command\":\"get_mission\"}"
 
-	_, err = conn.Write([]byte("{'command':'get_mission'}"))
+	_, err = conn.Write([]byte(command))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching mission from DCS"})
 		conn.Close()
