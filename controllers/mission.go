@@ -99,6 +99,31 @@ func CurrentMission(c *gin.Context) {
 }
 
 func MissionChange(c *gin.Context) {
+	var requestBody models.ChangeMissionBody
+	err := c.BindJSON(&requestBody)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unexpected request body"})
+		return
+	}
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
+	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
+
+	_, err = conn.Write([]byte("{\"command\":\"load_mission\", \"mission_name\":\"" + requestBody.MissionName + "\"}\n"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
+		conn.Close()
+		return
+	}
 
 	c.JSON(http.StatusOK, "OK")
 }
