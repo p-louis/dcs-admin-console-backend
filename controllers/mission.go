@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/p-louis/dcs-admin/models"
@@ -71,8 +72,9 @@ func CurrentMission(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
 		return
 	}
+	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
 
-	_, err = conn.Write([]byte("{\"command\":\"get_mission\"}"))
+	_, err = conn.Write([]byte("{\"command\":\"get_mission\"}\n"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
 		conn.Close()
