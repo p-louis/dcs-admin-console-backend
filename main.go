@@ -26,6 +26,7 @@ func main() {
 	public := router.Group("/api")
 	public.POST("/login", controllers.Login)
 	public.Static("/tacviews", os.Getenv("TACVIEW_DIRECTORY"))
+	public.Static("/liberation", os.Getenv("LIBERATION_DIRECTORY"))
 
 	protected := router.Group("/api/admin")
 	protected.Use(middlewares.JwtAuthMiddleware())
