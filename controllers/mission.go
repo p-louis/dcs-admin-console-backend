@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log"
+	"net"
 
 	"github.com/gin-gonic/gin"
 	"github.com/p-louis/dcs-admin/models"
@@ -56,4 +57,38 @@ func Missions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, missions)
+}
+
+func CurrentMission(c *gin.Context) {
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
+	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+
+	_, err = conn.Write([]byte("{'command':'get_mission'}"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching mission from DCS"})
+		return
+	}
+
+	reply := make([]byte, 1024)
+
+	_, err = conn.Read(reply)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
+		return
+	}
+
+	c.JSON(http.StatusOK, reply)
+}
+
+func MissionChange(c *gin.Context) {
+
+	c.JSON(http.StatusOK, "OK")
 }
