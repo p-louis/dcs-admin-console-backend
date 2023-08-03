@@ -74,6 +74,7 @@ func CurrentMission(c *gin.Context) {
 	_, err = conn.Write([]byte("{'command':'get_mission'}"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching mission from DCS"})
+		conn.Close()
 		return
 	}
 
@@ -82,8 +83,11 @@ func CurrentMission(c *gin.Context) {
 	_, err = conn.Read(reply)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
+		conn.Close()
 		return
 	}
+
+	conn.Close()
 
 	c.JSON(http.StatusOK, reply)
 }
