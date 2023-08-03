@@ -89,13 +89,13 @@ func CurrentMission(c *gin.Context) {
 		conn.Close()
 		return
 	}
-	var result models.Mission
-
-	json.Unmarshal([]byte(reply), &result)
 
 	conn.Close()
 
-	c.JSON(http.StatusOK, result)
+	var result models.Mission
+	json.Unmarshal([]byte(reply), &result)
+
+	c.JSON(http.StatusOK, gin.H{"filename": result.Filename})
 }
 
 func MissionChange(c *gin.Context) {
