@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 	"time"
@@ -88,10 +89,13 @@ func CurrentMission(c *gin.Context) {
 		conn.Close()
 		return
 	}
+	var result models.Mission
+
+	json.Unmarshal([]byte(reply), &result)
 
 	conn.Close()
 
-	c.JSON(http.StatusOK, reply)
+	c.JSON(http.StatusOK, result)
 }
 
 func MissionChange(c *gin.Context) {
