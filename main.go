@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/p-louis/dcs-admin/controllers"
 	"github.com/p-louis/dcs-admin/middlewares"
-	"net"
 	"net/http"
 	"os"
 )
@@ -15,8 +14,6 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	conn, _ := net.Dial("tcp", "127.0.0.1:50051")
-
 	router := gin.Default()
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
 
@@ -37,7 +34,7 @@ func main() {
 	protected.GET("/tacview", controllers.TacViews)
 	protected.POST("/upload", controllers.Upload)
 	protected.GET("/mission", controllers.Missions)
-	protected.GET("/mission/current", controllers.CurrentMission(conn))
+	protected.GET("/mission/current", controllers.CurrentMission)
 	protected.POST("/mission", controllers.MissionChange)
 	protected.POST("/chat", controllers.SendChatMessage)
 

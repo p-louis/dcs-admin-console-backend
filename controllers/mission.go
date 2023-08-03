@@ -59,28 +59,37 @@ func Missions(c *gin.Context) {
 	c.JSON(http.StatusOK, missions)
 }
 
-func CurrentMission(conn net.Conn) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		_, err := conn.Write([]byte("{'command':'get_mission'}"))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching mission from DCS"})
-			conn.Close()
-			return
-		}
-
-		reply := make([]byte, 1024)
-
-		_, err = conn.Read(reply)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
-			conn.Close()
-			return
-		}
-
-		conn.Close()
-
-		c.JSON(http.StatusOK, reply)
+func CurrentMission(c *gin.Context) {
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
 	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+
+	_, err = conn.Write([]byte("{'command':'get_mission'}"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error fetching mission from DCS"})
+		conn.Close()
+		return
+	}
+
+	reply := make([]byte, 1024)
+
+	_, err = conn.Read(reply)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
+		conn.Close()
+		return
+	}
+
+	conn.Close()
+
+	c.JSON(http.StatusOK, reply)
 }
 
 func MissionChange(c *gin.Context) {
