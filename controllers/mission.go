@@ -92,10 +92,10 @@ func CurrentMission(c *gin.Context) {
 
 	conn.Close()
 
-	var result models.Mission
+	var result map[string]any
 	json.Unmarshal([]byte(reply), &result)
 
-	c.JSON(http.StatusOK, gin.H{"filename": result.Filename})
+	c.JSON(http.StatusOK, gin.H{"filename": result["filename"]})
 }
 
 func MissionChange(c *gin.Context) {
