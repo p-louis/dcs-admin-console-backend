@@ -36,6 +36,9 @@ func main() {
 	protected.GET("/mission", controllers.Missions)
 	protected.GET("/mission/current", controllers.CurrentMission)
 	protected.POST("/mission", controllers.MissionChange)
+	protected.POST("/pause", controllers.PauseMission)
+	protected.POST("/unpause", controllers.UnpauseMission)
+	protected.GET("/pause", controllers.GetPause)
 	protected.POST("/chat", controllers.SendChatMessage)
 
 	router.Run("localhost:8080")

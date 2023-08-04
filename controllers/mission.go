@@ -127,3 +127,87 @@ func MissionChange(c *gin.Context) {
 
 	c.JSON(http.StatusOK, "OK")
 }
+
+func PauseMission(c *gin.Context) {
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
+	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
+
+	_, err = conn.Write([]byte("{\"command\":\"pause_mission\"}\n"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
+		conn.Close()
+		return
+	}
+
+	c.JSON(http.StatusOK, "OK")
+}
+
+func UnpauseMission(c *gin.Context) {
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
+	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
+
+	_, err = conn.Write([]byte("{\"command\":\"unpause_mission\"}\n"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
+		conn.Close()
+		return
+	}
+
+	c.JSON(http.StatusOK, "OK")
+}
+
+func GetPause(c *gin.Context) {
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
+	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
+
+	_, err = conn.Write([]byte("{\"command\":\"get_pause\"}\n"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
+		conn.Close()
+		return
+	}
+
+	reader := bufio.NewReader(conn)
+	reply, err := reader.ReadString('\n')
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading pause-state from DCS"})
+		conn.Close()
+		return
+	}
+
+	conn.Close()
+
+	var result map[string]any
+	json.Unmarshal([]byte(reply), &result)
+
+	c.JSON(http.StatusOK, gin.H{"pause_state": result["pause_state"]})
+}
