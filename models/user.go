@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"github.com/p-louis/dcs-admin/utils/token"
@@ -23,14 +24,18 @@ func LoginCheck(username string, password string) (string, error) {
 	var err error
 
 	if username != os.Getenv("ADMIN_USERNAME") {
-		req, err := http.Get("https://x51squadron.com/login?ver=0.0.0")
+		err = errors.New("Invalid Username/Password")
+		client := &http.Client{}
+		req, err := http.NewRequest("POST", "https://uploader.x51squadron.com/login?ver=0.0.0", bytes.NewBuffer([]byte("")))
 
 		if err != nil {
 			return "", err
 		}
 
 		req.Header.Add("Authorization", "Basic "+basicAuth(username, password))
-		if req.StatusCode != 200 {
+
+		res, err := client.Do(req)
+		if res.StatusCode != 200 || err != nil {
 			err = errors.New("Invalid Username/Password")
 		}
 
