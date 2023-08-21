@@ -30,6 +30,9 @@ func LoginCheck(username string, password string) (string, error) {
 		}
 
 		req.Header.Add("Authorization", "Basic "+basicAuth(username, password))
+		if req.StatusCode != 200 {
+			err = errors.New("Invalid Username/Password")
+		}
 
 	} else if password != os.Getenv("ADMIN_PASSWORD") {
 		err = errors.New("Invalid Username/Password")
