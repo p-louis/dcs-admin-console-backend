@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"github.com/p-louis/dcs-admin/utils/token"
+	"log"
 	"net/http"
 	"os"
 )
@@ -24,23 +25,34 @@ func LoginCheck(username string, password string) (string, error) {
 	var err error
 
 	if username != os.Getenv("ADMIN_USERNAME") {
-		err = errors.New("Invalid Username/Password")
+		//err = errors.New("Invalid Username/Password")
+		log.Println("Validating " + username + ":" + password)
 		client := &http.Client{}
-		req, err := http.NewRequest("POST", "https://uploader.x51squadron.com/login?ver=0.0.0", bytes.NewBuffer([]byte("")))
+		req, err := http.NewRequest("POST", "https://hq.x51squadron.com/fileapi/login?ver=0.0.0", bytes.NewBuffer([]byte("")))
 
 		if err != nil {
 			return "", err
 		}
-
 		req.Header.Add("Authorization", "Basic "+basicAuth(username, password))
 
 		res, err := client.Do(req)
-		if res.StatusCode != 200 || err != nil {
-			err = errors.New("Invalid Username/Password")
-		}
 
+		if err != nil {
+			return "", err
+		}
+		log.Println(res)
+
+		if res.StatusCode != 200 {
+			err := errors.New("Invalid Username/Password")
+			if err != nil {
+				return "", err
+			}
+		}
 	} else if password != os.Getenv("ADMIN_PASSWORD") {
 		err = errors.New("Invalid Username/Password")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	if err != nil {
