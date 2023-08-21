@@ -1,8 +1,10 @@
 package models
 
 import (
+	"encoding/base64"
 	"errors"
 	"github.com/p-louis/dcs-admin/utils/token"
+	"net/http"
 	"os"
 )
 
@@ -11,13 +13,25 @@ type User struct {
 	Password string `json:"password"`
 }
 
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
 func LoginCheck(username string, password string) (string, error) {
 
 	var err error
 
-	//u := User{}
+	if username != os.Getenv("ADMIN_USERNAME") {
+		req, err := http.Get("https://x51squadron.com/login?ver=0.0.0")
 
-	if username != os.Getenv("ADMIN_USERNAME") || password != os.Getenv("ADMIN_PASSWORD") {
+		if err != nil {
+			return "", err
+		}
+
+		req.Header.Add("Authorization", "Basic "+basicAuth(username, password))
+
+	} else if password != os.Getenv("ADMIN_PASSWORD") {
 		err = errors.New("Invalid Username/Password")
 	}
 
