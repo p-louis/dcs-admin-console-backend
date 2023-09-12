@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 	"time"
-  "strconv"
+    "strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/p-louis/dcs-admin/models"
@@ -87,15 +87,18 @@ func Missions(c *gin.Context) {
 	}
 	conn.Close()
 
+	log.Printf("Received Missionlist %s",reply)
+
 	var missions []models.Mission
 	var result models.MissionListResult
 	json.Unmarshal([]byte(reply), &result)
 
-  for i := 1; i < len(result.MissionList.Missions); i++ {
+	log.Printf("Missionlist %s, Length: %n", result.MissionList.Missions, len(result.MissionList.Missions))
+  for i := 0; i < len(result.MissionList.Missions); i++ {
     var mis models.Mission
-    mis.Index = i
+    mis.Index = i+1
     mis.Filename = result.MissionList.Missions[i]
-    missions[i] = mis
+    missions = append(missions, mis)
   }
 
 	c.JSON(http.StatusOK, missions)
