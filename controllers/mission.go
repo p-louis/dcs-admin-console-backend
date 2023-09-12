@@ -118,7 +118,7 @@ func MissionChange(c *gin.Context) {
 	}
 	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
 
-	_, err = conn.Write([]byte("{\"command\":\"clear_missionlist\"}\n"))
+  _, err = conn.Write([]byte("{\"command\":\"delete_mission\", \"index\":1}\n"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
 		conn.Close()
