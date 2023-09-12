@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"time"
+  "strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/p-louis/dcs-admin/models"
@@ -36,28 +37,66 @@ func Upload(c *gin.Context) {
 		return
 	}
 
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
+		return
+	}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
+	}
+
+  _, err = conn.Write([]byte("{\"command\":\"append_mission\", \"mission_name\":\"C:\\\\users\\\\dcs\\\\Saved Games\\\\DCS.openbeta_server\\\\Missions\\\\" + file.Filename + "\"}\n"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
+		conn.Close()
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
 
 func Missions(c *gin.Context) {
-	src := os.Getenv("MISSION_DIRECTORY")
-
-	contents, err := os.ReadDir(src)
-
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "error fetching mission files"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
 		return
 	}
 
-	var missions []models.Mission
-
-	for i := range contents {
-		if !contents[i].IsDir() && strings.HasSuffix(contents[i].Name(), ".miz") {
-			mis := models.Mission{}
-			mis.Filename = contents[i].Name()
-			missions = append(missions, mis)
-		}
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
+		return
 	}
+
+  _, err = conn.Write([]byte("{\"command\":\"get_missionlist\"}\n"))
+  if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
+		conn.Close()
+		return
+	}
+
+	reader := bufio.NewReader(conn)
+	reply, err := reader.ReadString('\n')
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
+		conn.Close()
+		return
+	}
+	conn.Close()
+
+	var missions []models.Mission
+	var result models.MissionListResult
+	json.Unmarshal([]byte(reply), &result)
+
+  for i := 1; i < len(result.MissionList.Missions); i++ {
+    var mis models.Mission
+    mis.Index = i
+    mis.Filename = result.MissionList.Missions[i]
+    missions[i] = mis
+  }
 
 	c.JSON(http.StatusOK, missions)
 }
@@ -118,23 +157,7 @@ func MissionChange(c *gin.Context) {
 	}
 	conn.SetWriteDeadline(time.Now().Add(20 * time.Second))
 
-  _, err = conn.Write([]byte("{\"command\":\"delete_mission\", \"index\":1}\n"))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
-		conn.Close()
-		return
-	}
-
-	conn, err = net.DialTCP("tcp", nil, tcpAddr)
-  _, err = conn.Write([]byte("{\"command\":\"append_mission\", \"mission_name\":\"C:\\\\users\\\\dcs\\\\Saved Games\\\\DCS.openbeta_server\\\\Missions\\\\" + requestBody.MissionName + "\"}\n"))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
-		conn.Close()
-		return
-	}
-
-	conn, err = net.DialTCP("tcp", nil, tcpAddr)
-	_, err = conn.Write([]byte("{\"command\":\"run_mission\", \"index\":1}\n"))
+	_, err = conn.Write([]byte("{\"command\":\"run_mission\", \"index\":" + strconv.Itoa(requestBody.MissionIndex) +"}\n"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
 		conn.Close()
