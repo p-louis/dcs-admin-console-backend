@@ -125,7 +125,7 @@ func MissionChange(c *gin.Context) {
 		return
 	}
 
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	conn, err = net.DialTCP("tcp", nil, tcpAddr)
   _, err = conn.Write([]byte("{\"command\":\"append_mission\", \"mission_name\":\"C:\\users\\dcs\\Saved Games\\DCS.openbeta_server\\Missions\\" + requestBody.MissionName + "\"}\n"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
@@ -133,7 +133,7 @@ func MissionChange(c *gin.Context) {
 		return
 	}
 
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	conn, err = net.DialTCP("tcp", nil, tcpAddr)
 	_, err = conn.Write([]byte("{\"command\":\"run_mission\", \"index\":1}\n"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
