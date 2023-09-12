@@ -44,7 +44,7 @@ func LoginCheck(username string, password string) (string, error) {
 		return "", err
 	}
 
-	token, err := token.GenerateToken(1)
+	token, err := token.GenerateToken(24)
 
 	if err != nil {
 		return "", err
