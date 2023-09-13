@@ -22,6 +22,7 @@ func main() {
 	router.StaticFile("", basePath+"/static/index.html")
 	router.StaticFile("main.js", basePath+"/static/main.js")
 	router.Static("css", basePath+"/static/css")
+	router.Static("webfonts", basePath+"/static/webfonts")
 
 	public := router.Group("/api")
 	public.POST("/login", controllers.Login)
