@@ -18,6 +18,7 @@ func DcsStatus(c *gin.Context) {
   out, err := exec.Command("sudo", "systemctl", "status", "dcs").Output()
 
   if err != nil {
+    log.Println("Encountered an error {}", err)
     c.JSON(http.StatusInternalServerError, gin.H{"message": "Can't fetch service status"})
     return
   }
@@ -39,6 +40,7 @@ func SrsStatus(c *gin.Context) {
   out, err := exec.Command("sudo", "systemctl", "status", "srs").Output()
 
   if err != nil {
+    log.Println("Encountered an error {}", err)
     c.JSON(http.StatusInternalServerError, gin.H{"message": "Can't fetch service status"})
     return
   }
