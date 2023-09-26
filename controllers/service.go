@@ -15,13 +15,7 @@ func RestartDcs(c *gin.Context) {
 }
 
 func DcsStatus(c *gin.Context) {
-  out, err := exec.Command("sudo", "systemctl", "status", "dcs").Output()
-
-  if err != nil {
-    log.Println("Encountered an error {}", err)
-    c.JSON(http.StatusInternalServerError, gin.H{"message": "Can't fetch service status"})
-    return
-  }
+  out, _ := exec.Command("sudo", "systemctl", "status", "dcs").Output()
 
   if strings.Contains(string(out[:]), "active (running)") {
     c.JSON(http.StatusOK, gin.H{"status": "running"})
@@ -37,13 +31,7 @@ func RestartSrs(c *gin.Context) {
 }
 
 func SrsStatus(c *gin.Context) {
-  out, err := exec.Command("sudo", "systemctl", "status", "srs").Output()
-
-  if err != nil {
-    log.Println("Encountered an error {}", err)
-    c.JSON(http.StatusInternalServerError, gin.H{"message": "Can't fetch service status"})
-    return
-  }
+  out, _ := exec.Command("sudo", "systemctl", "status", "srs").Output()
 
   if strings.Contains(string(out[:]), "active (running)") {
     c.JSON(http.StatusOK, gin.H{"status": "running"})
