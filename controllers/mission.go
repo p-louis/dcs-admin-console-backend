@@ -59,23 +59,31 @@ func Upload(c *gin.Context) {
 }
 
 func Missions(c *gin.Context) {
+  missions := FetchMissionList(c)
+
+	c.JSON(http.StatusOK, missions)
+}
+
+func FetchMissionList(c *gin.Context) []models.Mission {
+	var missions []models.Mission
+
 	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:50051")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error resolving TCP address"})
-		return
+		return missions
 	}
 
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error connecting to DCS"})
-		return
+		return missions
 	}
 
   _, err = conn.Write([]byte("{\"command\":\"get_missionlist\"}\n"))
   if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error writing command to DCS"})
 		conn.Close()
-		return
+		return missions
 	}
 
 	reader := bufio.NewReader(conn)
@@ -83,17 +91,15 @@ func Missions(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading mission-data from DCS"})
 		conn.Close()
-		return
+		return missions
 	}
 	conn.Close()
 
 	log.Printf("Received Missionlist %s",reply)
 
-	var missions []models.Mission
 	var result models.MissionListResult
 	json.Unmarshal([]byte(reply), &result)
 
-	log.Printf("Missionlist %s, Length: %n", result.MissionList.Missions, len(result.MissionList.Missions))
   for i := 0; i < len(result.MissionList.Missions); i++ {
     var mis models.Mission
     mis.Index = i+1
@@ -101,7 +107,7 @@ func Missions(c *gin.Context) {
     missions = append(missions, mis)
   }
 
-	c.JSON(http.StatusOK, missions)
+  return missions
 }
 
 func CurrentMission(c *gin.Context) {

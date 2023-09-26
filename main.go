@@ -43,6 +43,10 @@ func main() {
 	protected.POST("/unpause", controllers.UnpauseMission)
 	protected.GET("/pause", controllers.GetPause)
 	protected.POST("/chat", controllers.SendChatMessage)
+	protected.GET("/dcs", controllers.DcsStatus)
+	protected.POST("/dcs", controllers.RestartDcs)
+	protected.GET("/srs", controllers.SrsStatus)
+	protected.POST("/srs", controllers.RestartSrs)
 
 	router.Run("localhost:8080")
 }
