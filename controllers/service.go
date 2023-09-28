@@ -11,9 +11,9 @@ import (
 func RestartDcs(c *gin.Context) {
   log.Println("Restarting DCS")
   if GetDcsStatus() == 1 {
-    exec.Command("sudo", "systemctl", "restart", "dcs").Output()
+    exec.Command("sudo", "systemctl", "restart", "dcs").Run()
   } else {
-    exec.Command("sudo", "systemctl", "start", "dcs").Output()
+    exec.Command("sudo", "systemctl", "start", "dcs").Run()
   }
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
@@ -31,9 +31,9 @@ func RestartSrs(c *gin.Context) {
   log.Println("Restarting SRS")
 
   if GetSrsStatus() == 1 {
-    exec.Command("sudo", "systemctl", "restart", "srs").Output()
+    exec.Command("sudo", "systemctl", "restart", "srs").Run()
   } else {
-    exec.Command("sudo", "systemctl", "start", "srs").Output()
+    exec.Command("sudo", "systemctl", "start", "srs").Run()
   }
 	c.JSON(http.StatusOK, gin.H{"message": "success"})
 }
